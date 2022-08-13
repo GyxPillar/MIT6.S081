@@ -50,7 +50,8 @@ usertrap(void)
   // save user program counter.
   p->trapframe->epc = r_sepc();
   
-  if(r_scause() == 8){
+  uint64 cause = r_scause();
+  if(cause == 8) {
     // system call
 
     if(p->killed)
@@ -67,6 +68,13 @@ usertrap(void)
     syscall();
   } else if((which_dev = devintr()) != 0){
     // ok
+  } else if(cause == 13 || cause == 15) {
+    uint64 fault_va = r_stval();  // 获取出错的虚拟地址
+
+    if(fault_va >= p->sz
+      || cowpage(p->pagetable, fault_va) != 0
+      || cowalloc(p->pagetable, PGROUNDDOWN(fault_va)) == 0)
+      p->killed = 1;
   } else {
     printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
     printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());

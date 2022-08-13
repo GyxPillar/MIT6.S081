@@ -12,10 +12,12 @@ void
 plicinit(void)
 {
   // set desired IRQ priorities non-zero (otherwise disabled).
-  *(uint32*)(PLIC + UART0_IRQ*4) = 1;
-  *(uint32*)(PLIC + VIRTIO0_IRQ*4) = 1;
+  *(uint32*)(PLIC + UART0_IRQ * 4) = 1;    // 设置PLIC接收来自UART的中断
+  *(uint32*)(PLIC + VIRTIO0_IRQ * 4) = 1;  // 设置PLIC接收来自IO磁盘的中断
 }
 
+// plicinithart函数表明CPU核对于哪些外设中断感兴趣
+// 因此在函数中每个CPU的核都表明自己对来自于UART和VIRTIO的中断感兴趣
 void
 plicinithart(void)
 {
