@@ -1,0 +1,28 @@
+1.Q:Which registers contain arguments to functions? For example, which register holds 13 in main's call to printf?
+A:a0-a7保存函数的参数，其中a0-a1还可以保存返回值。在对printf的调用中，13保存在a2中，由汇编代码中main函数中的li a2,13可以看出
+
+2.Q:Where is the call to function f in the assembly code for main? Where is the call to g? (Hint: the compiler may inline functions.
+A:没有调用。g被内联到f中，然后f又被内联到main中。由汇编代码中main函数中的li a1,12可以看出，直接将最后的结果12传递到了a1。
+
+3.Q:At what address is the function printf located?
+A:可以通过计算得到：
+auipc ra,0x0代表将当前立即数向右移动12位，然后加上pc寄存器的值，赋给ra寄存器。由于立即数为0，因此ra的值即为pc的值0x30。
+jalr 1536(ra)代表1536加上ra寄存器的值，然后赋值给pc。将1536转为16进制再加上0x30即为0x0000000000000630，也就是要跳转到printf的地址。
+
+4.Q:What value is in the register ra just after the jalr to printf in main?
+A:ra寄存器用来保存函数执行以后的下一条指令的地址，因此ra寄存器应当存放从printf返回main函数的地址，为0x38
+
+5.Q:Run the following code.
+
+	unsigned int i = 0x00646c72;
+	printf("H%x Wo%s", 57616, &i);
+      
+What is the output? Here's an ASCII table that maps bytes to characters.
+The output depends on that fact that the RISC-V is little-endian. If the RISC-V were instead big-endian what would you set i to in order to yield the same output? Would you need to change 57616 to a different value?
+A:%x表示以十六进制形式输出整数，因此首先将57616转为16进制数，为0xe110。%s表示按照字符的格式读取字符并输出，直到读取到 ‘\0’ 为止。RISC-V是小端字节序，因此在内存中存储的形式为0x726c6400。对应的ASCII值为0x72=‘r’，0x6c=‘l’，0x64=‘d’，0x00=‘\0’。因此最后printf输出的结果为"He110, World\0"。
+不需要修改57616。i需要进行反转，即i=0x726c6400。
+
+6.Q:In the following code, what is going to be printed after 'y='? (note: the answer is not a specific value.) Why does this happen?
+
+	printf("x=%d y=%d", 3);
+A:printf需要接收2个参数，将第一个参数3放在a1中，第二个参数放在a2中。由于没有第二个参数，所有直接输出寄存器a2中的值。
