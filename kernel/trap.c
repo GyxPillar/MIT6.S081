@@ -77,10 +77,20 @@ usertrap(void)
     exit(-1);
 
   // give up the CPU if this is a timer interrupt.
-  if(which_dev == 2)
-    yield();
+  if(which_dev == 2){
+  if(p->interval)
+  {
+    if(p->ticks == p->interval)
+    {
+    p->trapframecopy = p->trapframe + 512;  
+    memmove(p->trapframecopy,p->trapframe,sizeof(struct trapframe));    // 复制trapframe
+    p->trapframe->epc = (uint64)p->handler;
+    }
+    p->ticks++;
+  }
 
   usertrapret();
+}
 }
 
 //
@@ -217,4 +227,3 @@ devintr()
     return 0;
   }
 }
-

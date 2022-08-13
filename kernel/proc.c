@@ -126,7 +126,11 @@ found:
   memset(&p->context, 0, sizeof(p->context));
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
-
+  
+  p->interval = 0;  
+  p->handler = 0;	  
+  p->ticks = 0;     
+  
   return p;
 }
 
@@ -697,3 +701,20 @@ procdump(void)
     printf("\n");
   }
 }
+
+uint64 sys_sigalarm(void)
+{
+  int interval;
+  uint64 handler;
+  struct proc * p;
+  // sigalarm的第一个参数为ticks，第二个参数为void(*handler)()
+  if(argint(0, &interval) < 0 || argaddr(1, &handler) < 0 || interval < 0) {
+    return -1;
+  }
+  p = myproc();
+  p->interval = interval;
+  p->handler = handler;
+  p->ticks = 0;
+  return 0;
+}
+
