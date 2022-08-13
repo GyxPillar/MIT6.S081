@@ -63,7 +63,7 @@ void            ramdiskrw(struct buf*);
 void*           kalloc(void);
 void            kfree(void *);
 void            kinit(void);
-
+uint64          free_mem(void);
 // log.c
 void            initlog(int, struct superblock*);
 void            log_write(struct buf*);
@@ -86,6 +86,7 @@ int             cpuid(void);
 void            exit(int);
 int             fork(void);
 int             growproc(int);
+uint64          nproc(void);
 pagetable_t     proc_pagetable(struct proc *);
 void            proc_freepagetable(pagetable_t, uint64);
 int             kill(int);
